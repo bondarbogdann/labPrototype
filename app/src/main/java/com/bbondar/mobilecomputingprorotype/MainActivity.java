@@ -11,6 +11,7 @@ import java.util.Date;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.FragmentTransaction;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 
@@ -34,6 +35,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,7 +50,6 @@ import org.rajawali3d.view.SurfaceView;
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "nRFUART";
-    public static final String FIREBASE_URL = "https://interactivelab-6731d.firebaseio.com";
 
     private static final int REQUEST_SELECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
@@ -60,18 +61,18 @@ public class MainActivity extends AppCompatActivity {
     private UartService mService = null;
     private BluetoothDevice mDevice = null;
     private BluetoothAdapter mBtAdapter = null;
-    private Button btnConnectDisconnect,btnSend;
+    private Button btnSend;
     private EditText edtMessage;
     private TextView textMessage;
-    private SurfaceView rajawaliSurface;
     private Menu menu;
 
-    private BodyRenderer renderer;
     private FirebaseAuth mAuth;
     private FirebaseDatabase mDatabase;
 
     private String mUserId;
     private String userDataUrl;
+
+    private BodyFragment bodyFragment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -86,39 +87,11 @@ public class MainActivity extends AppCompatActivity {
             finish();
             return;
         }
-        btnConnectDisconnect=(Button) findViewById(R.id.btn_select);
         btnSend=(Button) findViewById(R.id.sendButton);
         edtMessage = (EditText) findViewById(R.id.sendText);
         textMessage = (TextView) findViewById(R.id.textMessage);
         service_init();
 
-        // Handle Disconnect & Connect button
-        btnConnectDisconnect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!mBtAdapter.isEnabled()) {
-                    Log.i(TAG, "onClick - BT not enabled yet");
-                    Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                    startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
-                }
-                else {
-                    if (btnConnectDisconnect.getText().equals("Connect")){
-
-                        //Connect button pressed, open DeviceListActivity class, with popup windows that scan for devices
-
-                        Intent newIntent = new Intent(MainActivity.this, DeviceListActivity.class);
-                        startActivityForResult(newIntent, REQUEST_SELECT_DEVICE);
-                    } else {
-                        //Disconnect button pressed
-                        if (mDevice!=null)
-                        {
-                            mService.disconnect();
-
-                        }
-                    }
-                }
-            }
-        });
         // Handle Send button
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -138,19 +111,21 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Set body model
-        rajawaliSurface = (SurfaceView) findViewById(R.id.rajawali_surface);
-        rajawaliSurface.setOnClickListener(new View.OnClickListener() {
+        bodyFragment = new BodyFragment();
+        getFragmentManager().beginTransaction()
+        .add(R.id.fragment_placeholder, bodyFragment)
+        .commit();
+
+        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.fragment_placeholder);
+        frameLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(mService != null) {
                     mService.setOffset();
-                    renderer.setOffset(mService.getXOffset(), mService.getYOffset(), mService.getZOffset());
+                    bodyFragment.getRenderer().setOffset(mService.getXOffset(), mService.getYOffset(), mService.getZOffset());
                 }
             }
         });
-        renderer = new BodyRenderer(this);
-        rajawaliSurface.setSurfaceRenderer(renderer);
 
         // Check Authentication
         mAuth = FirebaseAuth.getInstance();
@@ -260,7 +235,6 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
                         Log.d(TAG, "UART_CONNECT_MSG");
-                        btnConnectDisconnect.setText("Disconnect");
                         MenuItem connected = menu.findItem(R.id.connectedIcon);
                         connected.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.green_circle_256, null));
                         MenuItem connectItem = menu.findItem(R.id.action_connect);
@@ -280,7 +254,6 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
                         Log.d(TAG, "UART_DISCONNECT_MSG");
-                        btnConnectDisconnect.setText("Connect");
                         MenuItem connected = menu.findItem(R.id.connectedIcon);
                         connected.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.orange_circle_256, null));
                         MenuItem connectItem = menu.findItem(R.id.action_connect);
@@ -312,7 +285,7 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
                             textMessage.setText("["+currentDateTimeString+"]: "+ x + ";" + y + ";" + z );
-                            renderer.setRotation(x,y,z);
+                            bodyFragment.getRenderer().setRotation(x,y,z);
                             if(outOfBound)
                                 showMessage(UartService.TAKE_RIGHT_POSE);
                         } catch (Exception e) {
@@ -389,8 +362,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onResume() {
-        super.onResume();
         Log.d(TAG, "onResume");
+        super.onResume();
         if (!mBtAdapter.isEnabled()) {
             Log.i(TAG, "onResume - BT not enabled yet");
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);

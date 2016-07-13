@@ -1,0 +1,17 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:surfaceview="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.bbondar.mobilecomputingprorotype.BodyFragment">
+
+    <org.rajawali3d.view.SurfaceView
+        android:id="@+id/rajawali_surface"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        surfaceview:frameRate="60.0"
+        surfaceview:renderMode="RENDER_WHEN_DIRTY"/>
+
+</FrameLayout>
