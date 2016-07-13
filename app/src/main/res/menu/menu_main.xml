@@ -1,0 +1,23 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.bbondar.mobilecomputingprorotype.MainActivity">
+
+    <item
+        android:id="@+id/connectedIcon"
+        android:icon="@drawable/orange_circle_256"
+        android:title="@string/connectedStatus"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/action_connect"
+        android:title="@string/action_connect"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_settings"
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_logout"
+        android:title="@string/action_logout"
+        app:showAsAction="never"/>
+</menu>

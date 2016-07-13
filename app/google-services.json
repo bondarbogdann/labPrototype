@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "744242694010",
+    "firebase_url": "https://interactivelab-6731d.firebaseio.com",
+    "project_id": "interactivelab-6731d",
+    "storage_bucket": "interactivelab-6731d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:744242694010:android:d5a86787360ffbac",
+        "android_client_info": {
+          "package_name": "com.bbondar.mobilecomputingprorotype"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "744242694010-8vs546p6q3fodbm2i0fta6ecgnh0qqp1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDY3S6p7WQOluDPJ6lMVU7dRQHe-JcXqw8"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
