@@ -167,9 +167,9 @@ public class UartService extends Service {
                     e.printStackTrace();
                 }
                 String[] eulerAngles = value.split(";");
-                X = Double.parseDouble(eulerAngles[2]);
+                X = Double.parseDouble(eulerAngles[1]);
                 Y = Double.parseDouble(eulerAngles[0]);
-                Z = Double.parseDouble(eulerAngles[1]);
+                Z = Double.parseDouble(eulerAngles[2]);
                 intent.putExtra(DATA_X, X);
                 intent.putExtra(DATA_Y, Y);
                 intent.putExtra(DATA_Z, Z);
