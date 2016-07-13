@@ -54,10 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_SELECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
     private static final int REQUEST_SETTINGS = 3;
-    private static final int UART_PROFILE_CONNECTED = 20;
-    private static final int UART_PROFILE_DISCONNECTED = 21;
 
-    private int mState = UART_PROFILE_DISCONNECTED;
     private UartService mService = null;
     private BluetoothDevice mDevice = null;
     private BluetoothAdapter mBtAdapter = null;
@@ -172,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
                     startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
                 }
                 else {
-                    if (item.getTitle().equals("Connect")){
+                    if (mService.getConnectionState() == mService.STATE_DISCONNECTED){
                         //Connect button pressed, open DeviceListActivity class, with popup windows that scan for devices
 
                         Intent newIntent = new Intent(MainActivity.this, DeviceListActivity.class);
@@ -243,7 +240,6 @@ public class MainActivity extends AppCompatActivity {
                         btnSend.setEnabled(true);
                         ((TextView) findViewById(R.id.deviceName)).setText(mDevice.getName()+ " - ready");
                         textMessage.setText("["+currentDateTimeString+"] Connected to: "+ mDevice.getName());
-                        mState = UART_PROFILE_CONNECTED;
                     }
                 });
             }
@@ -262,7 +258,6 @@ public class MainActivity extends AppCompatActivity {
                         btnSend.setEnabled(false);
                         ((TextView) findViewById(R.id.deviceName)).setText("Not Connected");
                         textMessage.setText("["+currentDateTimeString+"] Disconnected from: "+ mDevice.getName());
-                        mState = UART_PROFILE_DISCONNECTED;
                         mService.close();
                     }
                 });
@@ -436,7 +431,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (mState == UART_PROFILE_CONNECTED) {
+        if (mService.getConnectionState() == mService.STATE_CONNECTED) {
             Intent startMain = new Intent(Intent.ACTION_MAIN);
             startMain.addCategory(Intent.CATEGORY_HOME);
             startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

@@ -65,51 +65,52 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/notificationStatus"
-        android:layout_above="@+id/textView2"
+        android:checked="true"
+        android:layout_alignTop="@+id/textView"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="31dp"
-        android:checked="true" />
+        android:layout_marginRight="10dp"/>
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/rtLimit"
-        android:layout_alignBottom="@+id/textView4"
+        android:layout_alignBaseline="@+id/textView4"
         android:layout_alignEnd="@+id/notificationStatus"
-        android:text="3" />
+        android:text="10"/>
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/bndLimit"
-        android:layout_alignBottom="@+id/textView5"
+        android:layout_alignBaseline="@+id/textView5"
         android:layout_alignEnd="@+id/rtLimit"
-        android:text="3" />
+        android:text="10" />
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/lnLimit"
-        android:layout_alignBottom="@+id/textView6"
+        android:layout_alignBaseline="@+id/textView6"
         android:layout_alignEnd="@+id/notificationStatus"
-        android:text="3" />
+        android:text="10"/>
 
     <Spinner
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/notInterval"
-        android:layout_above="@+id/textView3"
+        android:layout_alignBaseline="@+id/textView2"
         android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@+id/textView3"
+        android:layout_toEndOf="@+id/textView2"
         android:spinnerMode="dropdown" />
 
     <Spinner
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/dataInterval"
-        android:layout_below="@+id/textView2"
+        android:layout_alignBaseline="@+id/textView3"
         android:layout_toEndOf="@+id/textView3"
-        android:spinnerMode="dropdown" />
+        android:spinnerMode="dropdown"
+        android:layout_alignParentEnd="true"/>
 
     <Button
         android:layout_width="wrap_content"

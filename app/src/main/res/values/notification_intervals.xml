@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="notification_interval">
-        <item>1</item>
-        <item>5</item>
         <item>10</item>
         <item>20</item>
         <item>60</item>

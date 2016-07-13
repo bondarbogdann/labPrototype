@@ -53,9 +53,9 @@ public class UartService extends Service {
     private int mConnectionState = STATE_DISCONNECTED;
     private GoogleApiClient googleClient;
 
-    private static final int STATE_DISCONNECTED = 0;
-    private static final int STATE_CONNECTING = 1;
-    private static final int STATE_CONNECTED = 2;
+    public static final int STATE_DISCONNECTED = 0;
+    public static final int STATE_CONNECTING = 1;
+    public static final int STATE_CONNECTED = 2;
 
     public final static String ACTION_GATT_CONNECTED =
             "nrfUART.ACTION_GATT_CONNECTED";
@@ -91,11 +91,10 @@ public class UartService extends Service {
 
     private double XOffset, YOffset, ZOffset;
 
-    //default is 3 degrees
     private double rotateLimit, fbLimit, lrLimit;
 
-    private long lastWrongPoseTime;
-    private long checkTimeInterval; // default 1 second
+    private long lastCheckTime;
+    private long checkTimeInterval;
     private boolean notificationsOn;
 
     // Implements callback methods for GATT events that the app cares about.  For example,
@@ -177,19 +176,22 @@ public class UartService extends Service {
 
                 boolean outOfBound = false;
                 //TODO: check with real values
-                if(Math.abs(X - XOffset) > rotateLimit || Math.abs(Y - YOffset) > fbLimit || Math.abs(Z - ZOffset) > lrLimit){
-                    if((System.currentTimeMillis() - lastWrongPoseTime) > checkTimeInterval) {
-                        if(googleClient != null && googleClient.isConnected())
-                            new SendToDataLayerThread("/message_path", TAKE_RIGHT_POSE).start();
-                        if(notificationsOn)
+                Log.d(TAG, "Time before notify: " + (System.currentTimeMillis() - lastCheckTime) + "; Interval: " + checkTimeInterval);
+                if((System.currentTimeMillis() - lastCheckTime) > checkTimeInterval) {
+                    if (!inXInterval(X) || !inYInterval(Y) || !inZInterval(Z)) {
+                        if (notificationsOn) {
                             showMessage(TAKE_RIGHT_POSE);
+                            if (googleClient != null && googleClient.isConnected())
+                                new SendToDataLayerThread("/message_path", TAKE_RIGHT_POSE).start();
+                        }
                         outOfBound = true;
-                        lastWrongPoseTime = System.currentTimeMillis();
+                    } else {
+                        outOfBound = false;
+                        dismissMessage();
                     }
-                } else {
-                    outOfBound = false;
+                    intent.putExtra(OUT_OF_BOUND, outOfBound);
+                    lastCheckTime = System.currentTimeMillis();
                 }
-                intent.putExtra(OUT_OF_BOUND, outOfBound);
             } else{
                 intent.putExtra(EXTRA_DATA, characteristic.getValue());
             }
@@ -275,11 +277,11 @@ public class UartService extends Service {
 
         XOffset = YOffset = ZOffset = 0;
 
-        //default is 3 degrees
-        rotateLimit = fbLimit = lrLimit = 0;
+        //default is 10 degrees
+        rotateLimit = fbLimit = lrLimit = 10;
 
-        lastWrongPoseTime = System.currentTimeMillis();
-        checkTimeInterval = 1000; // default 1 second
+        checkTimeInterval = 10000; // default 10 second
+        lastCheckTime = System.currentTimeMillis() + checkTimeInterval;
         notificationsOn = true;
 
         return true;
@@ -444,6 +446,12 @@ public class UartService extends Service {
                 .setContentIntent(pendingIntent);
         notificationManager.notify(0, notificationBuilder.build());
     }
+
+    private void dismissMessage() {
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Service.NOTIFICATION_SERVICE);
+       notificationManager.cancel(0);
+    }
     /**
      * Retrieves a list of supported GATT services on the connected device. This should be
      * invoked only after {@code BluetoothGatt#discoverServices()} completes successfully.
@@ -518,4 +526,30 @@ public class UartService extends Service {
         this.notificationsOn = notificationsOn;
     }
 
+    public int getConnectionState(){
+        return mConnectionState;
+    }
+
+    //TODO: fix edge cases
+    private boolean inXInterval(double xValue){
+        Log.d(TAG, "X: " + (XOffset - rotateLimit) + " - " + (XOffset + rotateLimit));
+        return xValue > (XOffset - rotateLimit) && xValue < (XOffset + rotateLimit);
+    }
+
+    //TODO: fix edge cases
+    private boolean inYInterval(double yValue){
+        Log.d(TAG, "Y: " + ((360 + YOffset - fbLimit) % 360) + " - " + ((360 + YOffset + fbLimit) % 360));
+        double a = (360 + YOffset - fbLimit) % 360;
+        double b = (360 + YOffset + fbLimit) % 360;
+        if (a < b)
+            return yValue > a && yValue < b;
+        else
+            return yValue > a || yValue < b;
+    }
+
+    //TODO: fix edge cases
+    private boolean inZInterval(double zValue){
+        Log.d(TAG, "Z: " + (ZOffset - lrLimit) + " - " + (ZOffset + lrLimit));
+        return zValue > (ZOffset - lrLimit) && zValue < (ZOffset + lrLimit);
+    }
 }
